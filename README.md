@@ -3,6 +3,7 @@
 A Python tool for reading and processing `.mbez` files - compressed sonar log files from Blueye underwater robotics systems.
 
 This project demonstrates how to:
+
 - Parse `.mbez` files using the `blueye.sdk` library
 - Extract multibeam sonar ping telemetry data
 - Transform polar coordinate sonar data to Cartesian fan-shaped images
@@ -83,9 +84,9 @@ fan_image = create_fan_image(raw_data, bearings)
 
 # Visualize
 visualize_transformation(
-    raw_data, 
-    bearings, 
-    fan_image, 
+    raw_data,
+    bearings,
+    fan_image,
     output_path="output.png"
 )
 ```
@@ -141,6 +142,7 @@ mbez-reader/
 ## File Format
 
 `.mbez` files are gzip-compressed binary log files containing:
+
 - Format: `YYYYMMDD_HHMMSS.oculus.mbez` (timestamp-based naming)
 - Content: Protobuf messages serialized via `blueye.protocol`
 - Primary message: `MultibeamPingTel` (multibeam sonar ping telemetry)
@@ -158,7 +160,7 @@ The fan transformation converts sonar data from polar coordinates (range, bearin
 
 1. **Input**: Raw data matrix (ranges × beams) + bearing angles
 2. **Output**: Fan-shaped image where each pixel maps to a polar coordinate
-3. **Method**: 
+3. **Method**:
    - Create meshgrid of output image coordinates
    - Compute polar coordinates (r, θ) for each pixel
    - Find closest bearing angle for each θ
@@ -170,7 +172,7 @@ This creates a fan-shaped visualization suitable for image processing and analys
 ## Dependencies
 
 - **blueye-protocol**: Protobuf message definitions
-- **blueye-sdk**: LogStream parser for `.mbez` files  
+- **blueye-sdk**: LogStream parser for `.mbez` files
 - **numpy**: Numerical operations and array handling
 - **matplotlib**: Visualization and image generation
 
