@@ -2,6 +2,8 @@
 
 A Python tool for reading and processing `.mbez` files - compressed sonar log files from Blueye underwater robotics systems.
 
+> **Note**: This project was developed through pair-programming with GitHub Copilot, an AI coding assistant.
+
 This project demonstrates how to:
 
 - Parse `.mbez` files using the `blueye.sdk` library
