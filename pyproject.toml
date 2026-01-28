@@ -15,7 +15,7 @@ dependencies = [
 dev = ["ipykernel>=7.1.0", "ipython>=9.9.0", "jupyter-client>=8.8.0"]
 
 [project.scripts]
-fan-transform = "mbez_reader:main"
+mbez_reader = "mbez_reader:main"
 
 [build-system]
 requires = ["hatchling"]
