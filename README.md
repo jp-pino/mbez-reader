@@ -145,7 +145,7 @@ mbez-reader/
 
 `.mbez` files are gzip-compressed binary log files containing:
 
-- Format: `YYYYMMDD_HHMMSS.oculus.mbez` (timestamp-based naming)
+- Naming: Typically `Multibeam_BYEDP######_YYYY-MM-DD_HHMMSS.mbez` (any name with `.mbez` extension works)
 - Content: Protobuf messages serialized via `blueye.protocol`
 - Primary message: `MultibeamPingTel` (multibeam sonar ping telemetry)
 
