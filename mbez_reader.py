@@ -78,7 +78,7 @@ def create_fan_image(raw_data: np.ndarray, bearings: np.ndarray) -> np.ndarray:
 
     Args:
         raw_data: 2D array of shape (num_ranges, num_beams) containing intensity values
-        bearings: 1D array of bearing angles in degrees (typically -FOV/2 to +FOV/2)
+        bearings: 1D array of bearing angles in radians (typically -FOV/2 to +FOV/2)
 
     Returns:
         fan: 2D Cartesian image array of shape (HEIGHT, WIDTH)
@@ -96,10 +96,12 @@ def create_fan_image(raw_data: np.ndarray, bearings: np.ndarray) -> np.ndarray:
     max_bearing = bearings.max()
     fov = max_bearing - min_bearing
     height = raw_data.shape[0]
-    width = int(2 * height * np.sin(np.deg2rad(fov / 2)))
+    width = int(2 * height * np.sin(fov / 2))
 
     print(f"Creating fan image:")
-    print(f"  FOV: {fov:.2f}° (bearings: {min_bearing:.1f}° to {max_bearing:.1f}°)")
+    print(
+        f"  FOV: {np.rad2deg(fov):.2f}° (bearings: {np.rad2deg(min_bearing):.1f}° to {np.rad2deg(max_bearing):.1f}°)"
+    )
     print(f"  Raw data shape: {raw_data.shape}")
     print(f"  Output dimensions: {width}x{height}")
 
@@ -112,7 +114,7 @@ def create_fan_image(raw_data: np.ndarray, bearings: np.ndarray) -> np.ndarray:
     X, Y = np.meshgrid(x_coords, y_coords)
 
     # Convert Cartesian to polar coordinates (vectorized)
-    theta = np.rad2deg(np.arctan2(X, Y))  # Bearing angle for each pixel
+    theta = np.arctan2(X, Y)  # Bearing angle for each pixel (in radians)
     r = np.sqrt(X**2 + Y**2)  # Range for each pixel
 
     # Initialize output
