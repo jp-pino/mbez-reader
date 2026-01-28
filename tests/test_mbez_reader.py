@@ -105,7 +105,7 @@ def test_extract_pings_from_file():
     mbez_file = Path("../mbez/20241022_135915.oculus.mbez")
 
     # Extract first ping
-    pings = extract_pings(mbez_file, start_index=0, count=1)
+    pings = list(extract_pings(mbez_file, start_index=0, count=1))
 
     assert len(pings) == 1
     assert hasattr(pings[0], "number_of_ranges")
@@ -123,7 +123,7 @@ def test_extract_multiple_pings():
     mbez_file = Path("../mbez/20241022_135915.oculus.mbez")
 
     # Extract 5 pings starting from index 10
-    pings = extract_pings(mbez_file, start_index=10, count=5)
+    pings = list(extract_pings(mbez_file, start_index=10, count=5))
 
     assert len(pings) == 5
 

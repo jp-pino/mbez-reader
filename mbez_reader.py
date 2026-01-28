@@ -25,47 +25,45 @@ def parse_logfile(log: Path) -> LogStream:
     return LogStream(log_bytes)
 
 
-def extract_pings(
-    logfile: Path, start_index: int = 0, count: int = 1
-) -> list[bp.MultibeamPingTel]:
+def extract_pings(logfile: Path, start_index: int = 0, count: int = 1):
     """
-    Extract MultibeamPingTel messages from a logfile.
+    Extract MultibeamPingTel messages from a logfile as a generator.
 
     Args:
         logfile: Path to the .mbez file
         start_index: Zero-based index of the first ping to extract
-        count: Number of pings to extract
+        count: Number of pings to extract (None for all remaining pings)
 
-    Returns:
-        List of MultibeamPingTel messages
+    Yields:
+        MultibeamPingTel messages
 
     Raises:
-        ValueError: If not enough pings are found in the logfile
+        ValueError: If no pings are found at the starting index
     """
     generator = parse_logfile(logfile)
-    pings = []
     current_index = 0
+    yielded_count = 0
+    found_any = False
 
     for unix_ts, delta, msg_type, msg in generator:
         if msg_type.__name__ == "MultibeamPingTel":
             if current_index >= start_index:
-                pings.append(msg)
-                if len(pings) >= count:
-                    return pings
+                found_any = True
+                yield msg
+                yielded_count += 1
+                if count is not None and yielded_count >= count:
+                    return
             current_index += 1
 
-    if len(pings) == 0:
+    if not found_any:
         raise ValueError(
             f"No MultibeamPingTel messages found starting at index {start_index}"
         )
-    elif len(pings) < count:
+    elif count is not None and yielded_count < count:
         print(
-            f"Warning: Only found {len(pings)} ping(s) starting at index {start_index}, "
+            f"Warning: Only found {yielded_count} ping(s) starting at index {start_index}, "
             f"requested {count}"
         )
-        return pings
-
-    return pings
 
 
 def create_fan_image(raw_data: np.ndarray, bearings: np.ndarray) -> np.ndarray:
@@ -255,17 +253,17 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
     print(f"Output directory: {output_dir.absolute()}")
 
-    # Extract pings
+    # Extract and process pings
     print(f"\nReading {input_path}...")
     print(f"Extracting {args.count} ping(s) starting at index {args.start}")
-    pings = extract_pings(input_path, start_index=args.start, count=args.count)
-    print(f"Successfully extracted {len(pings)} ping(s)")
+
+    ping_generator = extract_pings(input_path, start_index=args.start, count=args.count)
 
     # Process each ping
-    for i, ping in enumerate(pings):
+    for i, ping in enumerate(ping_generator):
         ping_index = args.start + i
         print(f"\n{'-' * 70}")
-        print(f"Processing ping #{ping_index} ({i+1}/{len(pings)})")
+        print(f"Processing ping #{ping_index} ({i+1})")
         print(f"{'-' * 70}")
 
         # Display ping metadata
@@ -297,16 +295,19 @@ def main():
 
         # Visualize and save
         print(f"\nSaving to {output_path}...")
+        # Only show visualization for the last ping (when count is 1 or last iteration)
+        show_viz = not args.no_show and (args.count == 1 or i == args.count - 1)
+
         visualize_transformation(
             raw_data,
             fan_image,
             ping.ping.bearings,
             save_path=str(output_path),
-            show=not args.no_show and i == len(pings) - 1,  # Only show last ping
+            show=show_viz,
         )
 
     print(f"\n{'-' * 70}")
-    print(f"Completed! Processed {len(pings)} ping(s)")
+    print(f"Completed processing!")
     print(f"Output saved to: {output_dir.absolute()}")
     print(f"{'-' * 70}")
 
