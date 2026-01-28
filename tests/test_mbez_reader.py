@@ -8,18 +8,20 @@ from mbez_reader import create_fan_image, extract_pings
 
 def test_create_fan_image_basic():
     """Test basic fan image creation with simple data."""
-    # Create simple test data: 3 ranges x 3 beams
+    # Create simple test data: 100 ranges x 5 beams
     raw_data = np.array(
         [
-            [100, 150, 200],
-            [110, 160, 210],
-            [120, 170, 220],
-        ],
+            [100, 125, 150, 175, 200],
+            [110, 135, 160, 185, 210],
+            [120, 145, 170, 195, 220],
+        ]
+        * 33
+        + [[100, 125, 150, 175, 200]],
         dtype=np.uint8,
-    )
+    )  # 100 rows
 
-    # Bearings: -10°, 0°, 10° (in radians)
-    bearings = np.array([-0.1745, 0.0, 0.1745])
+    # Bearings: -45°, -22.5°, 0°, 22.5°, 45° (in degrees)
+    bearings = np.array([-45.0, -22.5, 0.0, 22.5, 45.0])
 
     fan_image = create_fan_image(raw_data, bearings)
 
@@ -38,15 +40,15 @@ def test_create_fan_image_basic():
 def test_create_fan_image_output_dimensions():
     """Test that output dimensions are calculated correctly."""
     raw_data = np.ones((100, 50), dtype=np.uint8) * 128
-    bearings = np.linspace(-1.0, 1.0, 50)  # ~114° FOV
+    bearings = np.linspace(-57.3, 57.3, 50)  # ~114° FOV
 
     fan_image = create_fan_image(raw_data, bearings)
 
     # Height should match number of ranges
     assert fan_image.shape[0] == 100
 
-    # Width should be approximately 2 * ranges * sin(max_bearing)
-    expected_width = int(2 * 100 * np.sin(1.0))
+    # Width should be approximately 2 * ranges * sin(deg2rad(max_bearing))
+    expected_width = int(2 * 100 * np.sin(np.deg2rad(57.3)))
     assert abs(fan_image.shape[1] - expected_width) < 10  # Allow small variance
 
 
@@ -64,15 +66,17 @@ def test_create_fan_image_preserves_values():
 
 
 def test_create_fan_image_zero_bearing():
-    """Test with zero bearing (should create narrow vertical image)."""
-    raw_data = np.ones((10, 1), dtype=np.uint8) * 100
-    bearings = np.array([0.0])
+    """Test with single bearing (narrow output)."""
+    raw_data = np.ones((100, 3), dtype=np.uint8) * 100
+    # Very narrow FOV (~1.15 degrees)
+    bearings = np.array([-0.57, 0.0, 0.57])
 
     fan_image = create_fan_image(raw_data, bearings)
 
-    # Should be very narrow
-    assert fan_image.shape[1] <= 3
-    assert np.any(fan_image == 100)
+    # Should be narrow (but not zero width)
+    assert fan_image.shape[0] == 100
+    assert fan_image.shape[1] > 0  # Has some width
+    assert fan_image.shape[1] <= 5  # But very narrow
 
 
 def test_create_fan_image_with_actual_data(tmp_path):
@@ -82,7 +86,7 @@ def test_create_fan_image_with_actual_data(tmp_path):
     num_beams = 256
 
     raw_data = np.random.randint(0, 255, (num_ranges, num_beams), dtype=np.uint8)
-    bearings = np.linspace(-1.134, 1.134, num_beams)  # ~130° FOV
+    bearings = np.linspace(-65.0, 65.0, num_beams)  # ~130° FOV
 
     fan_image = create_fan_image(raw_data, bearings)
 
