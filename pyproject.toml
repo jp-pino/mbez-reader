@@ -1,0 +1,31 @@
+[project]
+name = "mbez-reader"
+version = "0.1.0"
+description = "Read and process .mbez files (compressed sonar log files from Blueye underwater robotics systems)"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+  "blueye-protocol>=3.2.0",
+  "blueye-sdk>=2.6.0",
+  "matplotlib>=3.10.8",
+  "numpy>=2.4.1",
+]
+
+[project.optional-dependencies]
+dev = ["ipykernel>=7.1.0", "ipython>=9.9.0", "jupyter-client>=8.8.0"]
+
+[project.scripts]
+fan-transform = "mbez_reader:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+  "ipykernel>=7.1.0",
+  "ipython>=9.9.0",
+  "jupyter-client>=8.8.0",
+  "pytest>=8.0.0",
+  "pytest-cov>=4.1.0",
+]
