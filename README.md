@@ -48,6 +48,12 @@ uv run python mbez_reader.py mbez/20241022_135915.oculus.mbez
 # Process multiple pings starting from index 100
 uv run python mbez_reader.py mbez/20241022_135915.oculus.mbez --start 100 -n 10
 
+# Process ALL pings from start to end of file
+uv run python mbez_reader.py mbez/20241022_135915.oculus.mbez --all
+
+# Process all pings starting from index 50
+uv run python mbez_reader.py mbez/20241022_135915.oculus.mbez --start 50 --all
+
 # Save to a custom output directory
 uv run python mbez_reader.py mbez/20241022_135915.oculus.mbez -o results/
 
@@ -145,7 +151,7 @@ mbez-reader/
 
 `.mbez` files are gzip-compressed binary log files containing:
 
-- Naming: Typically `Multibeam_BYEDP######_YYYY-MM-DD_HHMMSS.mbez` (any name with `.mbez` extension works)
+- Naming: Typically `multibeam_BYEDP######_YYYY-MM-DD_HHMMSS.mbez` (any name with `.mbez` extension works)
 - Content: Protobuf messages serialized via `blueye.protocol`
 - Primary message: `MultibeamPingTel` (multibeam sonar ping telemetry)
 

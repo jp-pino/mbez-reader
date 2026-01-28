@@ -222,7 +222,12 @@ def main():
         "--count",
         type=int,
         default=1,
-        help="Number of pings to process",
+        help="Number of pings to process (ignored if --all is specified)",
+    )
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Process all pings from start index to end of file",
     )
     parser.add_argument(
         "--no-show",
@@ -242,9 +247,12 @@ def main():
     if args.start < 0:
         print(f"Error: Start index must be >= 0, got {args.start}")
         return 1
-    if args.count < 1:
+    if not args.all and args.count < 1:
         print(f"Error: Count must be >= 1, got {args.count}")
         return 1
+
+    # Determine count (None means all)
+    count = None if args.all else args.count
 
     # Create output directory
     output_dir = Path(args.output_dir)
@@ -253,9 +261,12 @@ def main():
 
     # Extract and process pings
     print(f"\nReading {input_path}...")
-    print(f"Extracting {args.count} ping(s) starting at index {args.start}")
-
-    ping_generator = extract_pings(input_path, start_index=args.start, count=args.count)
+    if args.all:
+        print(f"Extracting all pings starting at index {args.start}")
+    else:
+        print(f"Extracting {args.count} ping(s) starting at index {args.start}")
+    
+    ping_generator = extract_pings(input_path, start_index=args.start, count=count)
 
     # Process each ping
     for i, ping in enumerate(ping_generator):
@@ -293,8 +304,9 @@ def main():
 
         # Visualize and save
         print(f"\nSaving to {output_path}...")
-        # Only show visualization for the last ping (when count is 1 or last iteration)
-        show_viz = not args.no_show and (args.count == 1 or i == args.count - 1)
+        # Only show visualization for the last ping (when count is 1 or processing single ping)
+        # For --all mode, never show (too many pings)
+        show_viz = not args.no_show and not args.all and count == 1
 
         visualize_transformation(
             raw_data,
